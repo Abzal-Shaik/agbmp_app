@@ -1,0 +1,40 @@
+{
+  "applications": [
+    {
+      "id": "APP-2026-089",
+      "applicant": "John Doe Farms LLC",
+      "lenderOrg": "Merchants Bank - Cannon Falls",
+      "projectCategory": "Waste Management & Manure Storage",
+      "county": "Goodhue",
+      "requestedAmount": "$45,000.00",
+      "amountValue": 45000,
+      "estimatedCompletion": "2026-11-30",
+      "date": "07/15/2026",
+      "status": "Submitted"
+    },
+    {
+      "id": "APP-2026-092",
+      "applicant": "Valley View Ag Inc",
+      "lenderOrg": "Merchants Bank - Cannon Falls",
+      "projectCategory": "Conservation Tillage Equipment",
+      "county": "Dakota",
+      "requestedAmount": "$68,500.00",
+      "amountValue": 68500,
+      "estimatedCompletion": "2026-12-15",
+      "date": "07/20/2026",
+      "status": "Under Review"
+    },
+    {
+      "id": "APP-2026-095",
+      "applicant": "Green Pastures Dairy",
+      "lenderOrg": "Merchants Bank - Cannon Falls",
+      "projectCategory": "Septic System Upgrade",
+      "county": "Rice",
+      "requestedAmount": "$12,000.00",
+      "amountValue": 12000,
+      "estimatedCompletion": "2026-10-31",
+      "date": "08/01/2026",
+      "status": "Submitted"
+    }
+  ]
+}

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgBMP Loan Management System | Minnesota Dept of Agriculture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    :root {
+      --navy-dark: #002747;
+      --navy-primary: #003865;
+      --navy-hover: #004d88;
+      --sidebar-width: 240px;
+      --sidebar-collapsed-width: 64px;
+      --header-height: 60px;
+      --green-accent: #78be20;
+      --bg-main: #f0f4f8;
+      --bg-container: #e6eff7;
+      --border-color: #d1dbe5;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --font-family: 'Open Sans', -apple-system, sans-serif;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-family); background-color: var(--bg-main); color: var(--text-dark); font-size: 14px; }
+
+    .app-container { display: flex; min-height: 100vh; width: 100vw; }
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .content-area { flex: 1; padding: 24px; max-width: 1600px; width: 100%; margin: 0 auto; }
+
+    /* Header */
+    .app-header {
+      height: var(--header-height); background: #ffffff; border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+      position: sticky; top: 0; z-index: 40; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .menu-toggle { background: none; border: none; color: var(--navy-primary); cursor: pointer; padding: 6px; border-radius: 4px; font-size: 18px; }
+    .system-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .org-selector { background-color: #edf2f7; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 12px; font-size: 13px; color: var(--navy-primary); font-weight: 500; cursor: pointer; }
+    .user-profile { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; cursor: pointer; }
+
+    /* Sidebar */
+    .app-sidebar { width: var(--sidebar-width); background-color: var(--navy-dark); color: #fff; display: flex; flex-direction: column; transition: width 0.3s; flex-shrink: 0; z-index: 50; }
+    .app-sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+    .sidebar-brand { height: var(--header-height); padding: 0 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .logo-m { font-size: 28px; font-weight: 900; color: #fff; display: flex; align-items: flex-end; }
+    .logo-m-dot { width: 10px; height: 10px; background-color: var(--green-accent); border-radius: 50%; margin-left: 2px; margin-bottom: 4px; }
+    .brand-state { font-size: 10px; letter-spacing: 1px; font-weight: 700; color: #94a3b8; }
+    .sidebar-nav { padding: 16px 0; display: flex; flex-direction: column; gap: 4px; }
+    
+    .nav-item { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 12px 20px; 
+      color: #cbd5e1; 
+      cursor: pointer; 
+      border-left: 4px solid transparent; 
+      transition: all 0.15s ease-in-out;
+    }
+    .nav-item:hover { background-color: var(--navy-primary); color: #ffffff; }
+    .nav-item.active { background-color: var(--navy-primary); color: #ffffff; border-left-color: var(--green-accent); font-weight: 700; }
+    .nav-item-left { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+
+    /* Page Title & Buttons */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--navy-dark); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
+    .btn-primary-outline { background-color: #fff; color: var(--navy-primary); border-color: var(--navy-primary); }
+    .btn-primary { background-color: #0b5ed7; color: #fff; }
+
+    /* Card & Form Grid */
+    .org-card { background-color: #fff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .org-card-header { background-color: var(--navy-primary); color: #fff; padding: 12px 20px; font-weight: 700; font-size: 15px; }
+    .org-card-body { padding: 20px; position: relative; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 24px; margin-right: 80px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 12px; font-weight: 700; color: #334155; }
+    .form-input { border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px 12px; font-size: 13px; background-color: #f8fafc; color: #1e293b; outline: none; }
+
+    /* Tabs & Tables */
+    .tabs-navigation { display: flex; gap: 4px; margin-bottom: -1px; }
+    .tab-btn { padding: 10px 20px; background-color: #e2e8f0; border: 1px solid #cbd5e1; border-bottom: none; border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; }
+    .tab-btn.active { background-color: var(--bg-container); color: var(--navy-primary); font-weight: 700; }
+    .tab-content-box { background-color: var(--bg-container); border: 1px solid #cbd5e1; border-radius: 0 8px 8px 8px; padding: 20px; }
+    .table-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .entries-selector { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+    .select-inline { padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; }
+    .search-box { position: relative; display: flex; align-items: center; }
+    .search-input { padding: 6px 12px 6px 32px; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; font-size: 13px; width: 220px; }
+
+    .custom-table { width: 100%; border-collapse: collapse; background-color: #fff; border-radius: 4px; overflow: hidden; }
+    .custom-table th { background-color: #e2e8f0; color: #334155; text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 700; border-bottom: 1px solid #cbd5e1; }
+    .custom-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155; }
+    .custom-table tr:hover td { background-color: #f8fafc; }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .badge-submitted { background-color: #dcfce7; color: #166534; }
+    .badge-pending { background-color: #fef9c3; color: #854d0e; }
+
+    /* Modals & Footer */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal-container { background: #fff; border-radius: 8px; width: 90%; max-width: 850px; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column; }
+    .modal-header { background: var(--navy-primary); color: #fff; padding: 16px 20px; display: flex; justify-content: space-between; }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 16px 20px; background: #f8fafc; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; }
+    .app-footer { text-align: center; padding: 16px; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; background: #fff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const DEMO_USERS = [
+      { username: 'mdaadmin', email: 'mdauserad@yopmail.com', password: 'password123', role: 'MDAAdmin', org: 'Ramsey' },
+      { username: 'lenderadmin', email: 'BEHokanson@merchantsbank.com', password: 'password123', role: 'LenderAdmin', org: 'Merchants Bank - Cannon Falls' }
+    ];
+
+    function App() {
+      const [currentUser, setCurrentUser] = useState({ username: 'mdaadmin', email: 'mdauserad@yopmail.com', role: 'MDAAdmin' });
+      const [sidebarOpen, setSidebarOpen] = useState(true);
+      const [activeView, setActiveView] = useState('dashboard');
+      const [selectedOrgHeader, setSelectedOrgHeader] = useState('Ramsey');
+      const [activeTab, setActiveTab] = useState('employees');
+      const [isNewAppModalOpen, setIsNewAppModalOpen] = useState(false);
+      const [selectedAppDetail, setSelectedAppDetail] = useState(null);
+
+      // Search Filter Forms State for Applications & Loans Views
+      const [appFilter, setAppFilter] = useState({ appNo: '', lgu: 'Select LGU', lender: 'Select Lender', borrower: '' });
+      const [loanFilter, setLoanFilter] = useState({ loanId: '', lgu: 'Select LGU', lender: 'Select Lender', borrower: '' });
+
+      // Applications Master List (4-digit app numbers)
+      const [applications, setApplications] = useState([
+        { id: '80061056', appNo: '80061056', appDate: '05/30/2024', borrower: 'John Doe Farms LLC', contactFirstName: 'Sujith', contactLastName: 'Kumar', category: 'Waste Management', amount: '$45,000.00', lgu: 'Goodhue County', lender: 'Merchants Bank - Cannon Falls', status: 'Submitted' },
+        { id: '1001', appNo: '1001', appDate: '06/12/2024', borrower: 'Valley View Ag Inc', contactFirstName: 'Robert', contactLastName: 'Miller', category: 'Conservation Tillage', amount: '$68,500.00', lgu: 'Dakota County', lender: 'Merchants Bank - Cannon Falls', status: 'Under Review' },
+        { id: '1002', appNo: '1002', appDate: '07/04/2024', borrower: 'Green Pastures Dairy', contactFirstName: 'Sarah', contactLastName: 'Jenkins', category: 'Septic System Upgrade', amount: '$12,000.00', lgu: 'Rice County', lender: 'Agribank FCB', status: 'Submitted' }
+      ]);
+
+      // Loans Master List matching Image 3
+      const [loans, setLoans] = useState([
+        { loanId: '4839', borrower: 'Anders& -', contactFirstName: 'Anders& -', contactLastName: 'Thiseth &', category: 'Septic Systems', amount: '$5,067.00', lgu: 'Wilkin County', lender: 'Bank of the West - Breckenridge' },
+        { loanId: '37834', borrower: 'BARTON', contactFirstName: 'BARTON', contactLastName: 'LLC', category: 'Structural Erosion Control', amount: '$0.00', lgu: 'McLeod Soil and Water Conservation District', lender: 'McLeod County Drainage Authority CD40' }
+      ]);
+
+      // New Application Form State
+      const [newAppForm, setNewAppForm] = useState({ borrower: '', amount: '50000', tenure: '5', rate: '4.5' });
+
+      const handleCreateApp = (e) => {
+        e.preventDefault();
+        const next4Digit = `${1000 + applications.length + 1}`; // 4-digit number e.g. 1004
+        const created = {
+          id: next4Digit,
+          appNo: next4Digit,
+          appDate: new Date().toLocaleDateString('en-US'),
+          borrower: newAppForm.borrower || 'New Borrower Entity',
+          contactFirstName: 'Jane',
+          contactLastName: 'Smith',
+          category: 'Waste Management',
+          amount: `$${parseFloat(newAppForm.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          lgu: 'Ramsey County',
+          lender: 'Merchants Bank - Cannon Falls',
+          status: 'Submitted'
+        };
+        setApplications([created, ...applications]);
+        alert(`Application created with 4-Digit Tracking Number: ${next4Digit}!`);
+        setIsNewAppModalOpen(false);
+      };
+
+      return (
+        <div className="app-container">
+          <aside className={`app-sidebar ${!sidebarOpen ? 'collapsed' : ''}`}>
+            <div className="sidebar-brand">
+              <div className="logo-m">m<span className="logo-m-dot"></span></div>
+              {sidebarOpen && <span className="brand-state">MINNESOTA</span>}
+            </div>
+            <nav className="sidebar-nav">
+              <div className={`nav-item ${activeView === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveView('dashboard')}>
+                <div className="nav-item-left">📊 {sidebarOpen && <span>Dashboard</span>}</div>
+              </div>
+              <div className={`nav-item ${activeView === 'applications' ? 'active' : ''}`} onClick={() => setActiveView('applications')}>
+                <div className="nav-item-left">📄 {sidebarOpen && <span>Applications</span>}</div>
+              </div>
+              <div className={`nav-item ${activeView === 'loans' ? 'active' : ''}`} onClick={() => setActiveView('loans')}>
+                <div className="nav-item-left">🏦 {sidebarOpen && <span>Loans</span>}</div>
+              </div>
+              <div className={`nav-item ${activeView === 'myorg' ? 'active' : ''}`} onClick={() => setActiveView('myorg')}>
+                <div className="nav-item-left">🏢 {sidebarOpen && <span>My Org</span>}</div>
+              </div>
+            </nav>
+          </aside>
+
+          <div className="main-wrapper">
+            <header className="app-header">
+              <div className="header-left">
+                <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
+                <span className="system-title">AgBMP Loan Management System</span>
+              </div>
+              <div className="header-right">
+                <select className="org-selector" value={selectedOrgHeader} onChange={e => setSelectedOrgHeader(e.target.value)}>
+                  <option value="Ramsey">Ramsey</option>
+                  <option value="Hennepin">Hennepin</option>
+                </select>
+                <div className="user-profile">
+                  <span style={{ fontWeight: 600 }}>{currentUser.email}</span>
+                  <span style={{ color: '#64748b', fontSize: '11px' }}>{currentUser.role}</span>
+                </div>
+              </div>
+            </header>
+
+            <main className="content-area">
+              
+              {/* IMAGE 1: DASHBOARD VIEW */}
+              {activeView === 'dashboard' && (
+                <div>
+                  <div className="page-header">
+                    <h1 className="page-title">Dashboard</h1>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button className="btn btn-primary-outline" onClick={() => setIsNewAppModalOpen(true)}>Create New Application</button>
+                      <button className="btn btn-primary-outline" onClick={() => alert('Bulk Loan Application Wizard Opened.')}>Create Bulk Application</button>
+                      <button className="btn btn-primary-outline" onClick={() => window.print()}>🖨️ Print All</button>
+                    </div>
+                  </div>
+
+                  {/* Accordion 1 */}
+                  <div className="org-card" style={{ marginBottom: '16px' }}>
+                    <div className="org-card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Awaiting Approval from AgBMP ℹ️ 🖨️</span><span>▲</span>
+                    </div>
+                    <div className="org-card-body" style={{ padding: '16px' }}>
+                      <table className="custom-table">
+                        <thead><tr><th>Application No</th><th>Application Date</th><th>Borrower</th><th>Category</th><th>Loan Amount</th><th>LGU</th><th>Status</th></tr></thead>
+                        <tbody>
+                          {applications.map(app => (
+                            <tr key={app.id}>
+                              <td>
+                                <button style={{ background: 'none', border: 'none', color: '#0b5ed7', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setSelectedAppDetail(app)}>
+                                  {app.appNo}
+                                </button>
+                              </td>
+                              <td>{app.appDate}</td>
+                              <td><strong>{app.borrower}</strong></td>
+                              <td>{app.category}</td>
+                              <td><strong>{app.amount}</strong></td>
+                              <td>{app.lgu}</td>
+                              <td><span className="badge badge-pending">{app.status}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Accordion 2 */}
+                  <div className="org-card" style={{ marginBottom: '16px' }}>
+                    <div className="org-card-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Current Active Applications ℹ️ 🖨️</span>
+                      <span>$5,000.00 Total Funds Available ▲</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* IMAGE 2: APPLICATIONS VIEW */}
+              {activeView === 'applications' && (
+                <div>
+                  <div className="page-header">
+                    <h1 className="page-title">Applications</h1>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button className="btn btn-primary-outline" onClick={() => setIsNewAppModalOpen(true)}>Create New Application</button>
+                      <button className="btn btn-primary-outline">Create Bulk Loan Application</button>
+                    </div>
+                  </div>
+
+                  <div className="org-card" style={{ marginBottom: '24px' }}>
+                    <div className="org-card-header">Search</div>
+                    <div className="org-card-body">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                        <div className="form-group"><label className="form-label">Application No</label><input className="form-input" placeholder="Enter Application No" value={appFilter.appNo} onChange={e => setAppFilter({ ...appFilter, appNo: e.target.value })} /></div>
+                        <div className="form-group"><label className="form-label">LGU</label><select className="form-input" value={appFilter.lgu} onChange={e => setAppFilter({ ...appFilter, lgu: e.target.value })}><option>Select LGU</option><option>Goodhue County</option></select></div>
+                        <div className="form-group"><label className="form-label">Lender</label><select className="form-input"><option>Select Lender</option></select></div>
+                        <div className="form-group"><label className="form-label">Borrower ℹ️</label><input className="form-input" placeholder="Enter Borrower Name" value={appFilter.borrower} onChange={e => setAppFilter({ ...appFilter, borrower: e.target.value })} /></div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <button className="btn btn-primary-outline" style={{ width: '120px' }} onClick={() => setAppFilter({ appNo: '', lgu: 'Select LGU', lender: 'Select Lender', borrower: '' })}>Reset</button>
+                        <button className="btn" style={{ width: '120px', background: '#54728c', color: '#fff' }}>Search</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="tab-content-box" style={{ borderRadius: '8px' }}>
+                    <table className="custom-table">
+                      <thead>
+                        <tr><th>Application No</th><th>Application Date</th><th>Borrower</th><th>Category</th><th>Loan Amount</th><th>LGU</th><th>Lender</th></tr>
+                      </thead>
+                      <tbody>
+                        {applications.map(app => (
+                          <tr key={app.id}>
+                            <td>
+                              <button style={{ background: 'none', border: 'none', color: '#0b5ed7', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setSelectedAppDetail(app)}>
+                                {app.appNo}
+                              </button>
+                            </td>
+                            <td>{app.appDate}</td>
+                            <td><strong>{app.borrower}</strong></td>
+                            <td>{app.category}</td>
+                            <td><strong>{app.amount}</strong></td>
+                            <td>{app.lgu}</td>
+                            <td>{app.lender}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* IMAGE 3: LOANS VIEW */}
+              {activeView === 'loans' && (
+                <div>
+                  <div className="page-header"><h1 className="page-title">Loans</h1></div>
+                  <div className="org-card" style={{ marginBottom: '24px' }}>
+                    <div className="org-card-header">Search</div>
+                    <div className="org-card-body">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                        <div className="form-group"><label className="form-label">Loan ID</label><input className="form-input" placeholder="Enter Loan ID" value={loanFilter.loanId} onChange={e => setLoanFilter({ ...loanFilter, loanId: e.target.value })} /></div>
+                        <div className="form-group"><label className="form-label">LGU</label><select className="form-input"><option>Select LGU</option></select></div>
+                        <div className="form-group"><label className="form-label">Lender</label><select className="form-input"><option>Select Lender</option></select></div>
+                        <div className="form-group"><label className="form-label">Borrower ℹ️</label><input className="form-input" placeholder="Borrower Name" /></div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <button className="btn btn-primary-outline" style={{ width: '120px' }}>Reset</button>
+                        <button className="btn" style={{ width: '120px', background: '#54728c', color: '#fff' }}>Search</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="tab-content-box" style={{ borderRadius: '8px' }}>
+                    <table className="custom-table">
+                      <thead>
+                        <tr><th>Loan ID</th><th>Borrower</th><th>Contact First Name</th><th>Contact Last Name</th><th>Category</th><th>Total Disbursed Amount</th><th>LGU</th><th>Lender</th></tr>
+                      </thead>
+                      <tbody>
+                        {loans.map(loan => (
+                          <tr key={loan.loanId}>
+                            <td><button style={{ background: 'none', border: 'none', color: '#0b5ed7', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>{loan.loanId}</button></td>
+                            <td>{loan.borrower}</td>
+                            <td>{loan.contactFirstName}</td>
+                            <td>{loan.contactLastName}</td>
+                            <td>{loan.category}</td>
+                            <td><strong>{loan.amount}</strong></td>
+                            <td>{loan.lgu}</td>
+                            <td>{loan.lender}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* IMAGE 4: MY ORG VIEW */}
+              {activeView === 'myorg' && (
+                <div>
+                  <div className="page-header"><h1 className="page-title">My Organization</h1></div>
+                  <div className="org-card">
+                    <div className="org-card-header">My Organization</div>
+                    <div className="org-card-body">
+                      <div className="form-grid">
+                        <div className="form-group"><label className="form-label">Name</label><input className="form-input" value="Ramsey" disabled /></div>
+                        <div className="form-group"><label className="form-label">Organization Name</label><input className="form-input" value="AgBMP Loan Program - Minnesota Dept of Ag" disabled /></div>
+                        <div className="form-group"><label className="form-label">Org Mailing Address</label><input className="form-input" value="4th cross 625 N Robert St, 2nd line, Saint Paul, Minn" disabled /></div>
+                        <div className="form-group"><label className="form-label">Org Service Area(s)</label><select className="form-input"><option>Ramsey</option></select></div>
+                        <div className="form-group"><label className="form-label">Org Primary Contact</label><select className="form-input"><option>Yeswanth E</option></select></div>
+                        <div className="form-group"><label className="form-label">Org Email</label><input className="form-input" value="yeswanth,Test" disabled /></div>
+                        <div className="form-group"><label className="form-label">Auth Representative</label><select className="form-input"><option>Please Select</option></select></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="tabs-navigation">
+                    {['Employees', 'Service Area Contacts', 'Lender List', 'Service Area Lenders', 'Attachments'].map(tab => (
+                      <button key={tab} className={`tab-btn ${activeTab === 'employees' ? 'active' : ''}`} onClick={() => setActiveTab('employees')}>{tab}</button>
+                    ))}
+                  </div>
+
+                  <div className="tab-content-box">
+                    <div style={{ marginBottom: '16px' }}>
+                      <button className="btn btn-primary">+ Add Contact</button>
+                    </div>
+                    <table className="custom-table">
+                      <thead>
+                        <tr><th>User Name</th><th>Name</th><th>Phone</th><th>Role</th><th>Receive Notice Copies</th><th>Actions</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr><td><strong>yeswanth.emuri@epathusa.net</strong></td><td>Yeswanth Emuri</td><td>(012) 345-6789</td><td>Admin. Admin</td><td>true</td><td>▼</td></tr>
+                        <tr><td><strong>anil.kurakula@epathusa.net</strong></td><td>Anil Kumar Kurakula</td><td>(012) 345-6789</td><td>Admin. Admin</td><td>false</td><td>▼</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+            </main>
+
+            <footer className="app-footer">Copyright © 2026 Minnesota Department of Agriculture. All rights reserved</footer>
+          </div>
+
+          {/* CREATE APPLICATION MODAL WITH 4-DIGIT APP NO */}
+          {isNewAppModalOpen && (
+            <div className="modal-overlay">
+              <div className="modal-container">
+                <div className="modal-header">
+                  <span>Create AgBMP Loan Application (4-Digit Number Generator)</span>
+                  <button onClick={() => setIsNewAppModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>✕</button>
+                </div>
+                <form onSubmit={handleCreateApp}>
+                  <div className="modal-body">
+                    <div style={{ background: '#003865', color: '#fff', padding: '12px', borderRadius: '6px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                      <div><span style={{ fontSize: '11px', color: '#93c5fd' }}>AUTO-GENERATED 4-DIGIT APP NO</span><h3 style={{ fontSize: '20px' }}>{1000 + applications.length + 1}</h3></div>
+                      <span style={{ background: '#fff', color: '#003865', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>4-Digit Key</span>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '12px' }}>
+                      <label className="form-label">Borrower Name *</label>
+                      <input className="form-input" required placeholder="e.g. Robert Paulson" value={newAppForm.borrower} onChange={e => setNewAppForm({ ...newAppForm, borrower: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div className="form-group">
+                        <label className="form-label">Loan Amount ($) *</label>
+                        <input className="form-input" type="number" value={newAppForm.amount} onChange={e => setNewAppForm({ ...newAppForm, amount: e.target.value })} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Tenure (Years) *</label>
+                        <select className="form-input" value={newAppForm.tenure} onChange={e => setNewAppForm({ ...newAppForm, tenure: e.target.value })}><option value="5">5 Years</option><option value="7">7 Years</option></select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-primary-outline" onClick={() => setIsNewAppModalOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Application ({1000 + applications.length + 1})</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* APPLICATION DETAIL MODAL */}
+          {selectedAppDetail && (
+            <div className="modal-overlay">
+              <div className="modal-container">
+                <div className="modal-header">
+                  <span>Application Details - {selectedAppDetail.appNo}</span>
+                  <button onClick={() => setSelectedAppDetail(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <div style={{ background: '#003865', color: '#fff', padding: '16px', borderRadius: '6px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                    <div><span style={{ fontSize: '11px', color: '#93c5fd' }}>4-DIGIT APPLICATION NO</span><h2>{selectedAppDetail.appNo}</h2></div>
+                    <span className="badge badge-submitted">Status: {selectedAppDetail.status}</span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                      <h4>Borrower Details</h4>
+                      <p><strong>Name:</strong> {selectedAppDetail.borrower}</p>
+                      <p><strong>LGU:</strong> {selectedAppDetail.lgu}</p>
+                      <p><strong>Lender:</strong> {selectedAppDetail.lender}</p>
+                    </div>
+                    <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                      <h4>Loan Parameters</h4>
+                      <p><strong>Amount:</strong> {selectedAppDetail.amount}</p>
+                      <p><strong>Category:</strong> {selectedAppDetail.category}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-primary-outline" onClick={() => window.print()}>🖨️ Print Details</button>
+                  <button className="btn btn-primary" onClick={() => setSelectedAppDetail(null)}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
